@@ -1,0 +1,1 @@
+Service to compress the image uploaded and store the thumbnail
