@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  s3LambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 's3.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Description: 'Lambda execution role to access S3'
+      Policies:
+        - PolicyName: 'LambdaS3Policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: 'IAMLambdaS3'
+                Effect: Allow
+                Action:
+                  - 's3:*'
+                Resource: '*'
+      RoleName: 'AWSLambdaImageRepoRole'
