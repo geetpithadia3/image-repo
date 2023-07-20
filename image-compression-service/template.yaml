@@ -11,11 +11,36 @@ Globals:
     Timeout: 300
     MemorySize: 128
 
+Parameters:
+  ImageRepoBucketName:
+    Type: String
+    Description: Name of the S3 bucket to store images
+    Default: image-repo-bucket
+
 Resources:
   ImageRepoBucket: 
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: "image-repo-bucket"
+      BucketName: !Ref ImageRepoBucketName
+
+  ImageRepoBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ImageRepoBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:DeleteBucket
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${ImageRepoBucket}"
+            Principal:
+              AWS: !Join ["", ["arn:aws:iam::", !Ref AWS::AccountId, ":root"]]
+          - Action:
+              - s3:DeleteObject
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${ImageRepoBucket}/*"
+            Principal:
+              AWS: !Join ["", ["arn:aws:iam::", !Ref AWS::AccountId, ":root"]]
 
   ImageCompressorFunction:
     Type: AWS::Serverless::Function
@@ -31,17 +56,4 @@ Resources:
           Properties:
             Bucket: !Ref ImageRepoBucket
             Events: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix 
-                  Value: raw   
-      Role: arn:aws:iam::913923565754:role/AWSLambdaImageRepoRole
-        
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  ImageCompressorFunction:
-    Description: ImageCompressorFunction Lambda Function ARN
-    Value: !GetAtt ImageCompressorFunction.Arn
+      Role: !ImportValue S3LambdaRoleArn      

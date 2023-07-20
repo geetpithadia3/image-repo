@@ -1,5 +1,5 @@
 import json
-import PIL.Image as Image
+from PIL import Image
 import boto3
 
 
@@ -9,14 +9,14 @@ def lambda_handler(event, context):
 
     # compress image
     client = boto3.client('s3')
-    
+    print(image_url)
     image_obj=client.get_object(Bucket='image-repo-bucket', Key=image_url)
     image = Image.open(image_obj['Body'])
     img=image.convert('RGB')
     size=128,128
     img.thumbnail(size)
     img.save('/tmp/compressed.jpg')
-    client.put_object(Bucket='image-repo-bucket', Key='compressed-images/compressed.jpg', Body=open('/tmp/compressed.jpg', 'rb'))
+    client.put_object(Bucket='image-repo-bucket', Key='compressed-images/'+image_url+'.jpg', Body=open('/tmp/compressed.jpg', 'rb'))
 
     return {
         'statusCode': 200,

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
-  s3LambdaRole:
+  S3LambdaRole:
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -9,7 +9,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service:
-                - 's3.amazonaws.com'
+                - 'lambda.amazonaws.com'
             Action:
               - 'sts:AssumeRole'
       Description: 'Lambda execution role to access S3'
@@ -23,4 +23,22 @@ Resources:
                 Action:
                   - 's3:*'
                 Resource: '*'
+        - PolicyName: 'LambdaCloudWatchPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: 'IAMLambdaCloudWatch'
+                Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
       RoleName: 'AWSLambdaImageRepoRole'
+Outputs:
+  S3LambdaRoleArn:
+    Description: 'Lambda execution role to access S3'
+    Value: !GetAtt S3LambdaRole.Arn
+    Export:
+      Name: 'S3LambdaRoleArn'
+
