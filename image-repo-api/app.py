@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 import os
 
-
 # function to load config based on enviroment
 def load_config(app):
     env = os.environ.get('FLASK_ENV', 'testing')
@@ -18,6 +17,9 @@ def load_config(app):
 def setup_db(app):
     print(app.config['SQLALCHEMY_DATABASE_URI'])
     from models import db
+    from models.image import Image
+    from models.user import User
+
     db.init_app(app)
     with app.app_context():
         db.create_all()
@@ -27,4 +29,10 @@ def create_app():
     load_config(app)
     setup_db(app)
     return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run()
+
+
 
